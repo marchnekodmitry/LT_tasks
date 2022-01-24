@@ -66,7 +66,7 @@ userRouter.post('/login', async (req, res, next) => {
     }
 
     const key = fs.readFileSync(path.resolve(PATH_TO_SRC, 'keys', 'private-key.pem'));
-console.log(Math.round(Math.random() * 30 + 30) * 1000);
+
     const accessToken = jwt.sign(
       {
         email: user.email,
