@@ -76,8 +76,6 @@ class UsersController {
         throw new APIError(401, "Email or password is incorrect");
       }
 
-     
-
       const accessToken = jwt.sign(
         {
           email: user.email,
