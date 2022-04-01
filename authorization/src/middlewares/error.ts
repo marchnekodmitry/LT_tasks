@@ -9,7 +9,6 @@ const errorMiddleware: ErrorRequestHandler = (err, req, res, next) => {
         message: err.message,
       },
     });
-
     return;
   }
 
@@ -19,7 +18,6 @@ const errorMiddleware: ErrorRequestHandler = (err, req, res, next) => {
         message: err.message,
       },
     });
-
     return;
   }
 

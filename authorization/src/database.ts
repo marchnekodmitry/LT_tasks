@@ -1,29 +1,27 @@
-import { Db, MongoClient } from 'mongodb';
+import { Collection, Db, MongoClient } from "mongodb";
+import { User } from "./models/user";
 
 const uri =
   "mongodb+srv://databaseUser:30eW26OxrGyG47eX@cluster0.byj43.mongodb.net?retryWrites=true&w=majority";
 
 class Database {
-  private userDB: Db | null = null;
-  private client: MongoClient;
+  private db: Db;
+  private usersCollection: Collection<User>;
 
-  constructor() {
-    this.client = new MongoClient(uri);
-
-    const connect = async () => {
-      await this.client.connect();
-
-      this.userDB = this.client.db('user');
-    };
-
-    connect();
+  private constructor(client: MongoClient) {
+    this.db = client.db("dima_auth_db");
+    this.usersCollection = this.db.collection<User>("users")!;
   }
 
-  get user() {
-    return this.userDB!;
+  static init = async (): Promise<Database> => {
+    const client = new MongoClient(uri);
+    await client.connect();
+    return new Database(client);
+  };
+
+  get users() {
+    return this.usersCollection;
   }
 }
 
-const DB = new Database();
-
-export default DB;
+export default Database;
