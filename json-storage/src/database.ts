@@ -1,29 +1,31 @@
-import { Db, MongoClient } from 'mongodb';
+import { Collection, Db, MongoClient } from "mongodb";
+import { Storage } from './models/storage';
 
 const uri =
-  "mongodb+srv://jsonStorageUser:BQZ1fNUN9B6gkRiu@storagecluster.pkj9p.mongodb.net?retryWrites=true&w=majority";
+  "mongodb+srv://jsonStorageUser:Doa4MtmjUk6aIOdy@storagecluster.pkj9p.mongodb.net/?retryWrites=true&w=majority";
 
 class Database {
-  private jsonStorageDb: Db | null = null;
-  private client: MongoClient;
+  private db: Db;
+  private storageCollection: Collection<Storage>;
 
-  constructor() {
-    this.client = new MongoClient(uri);
-
-    const connect = async () => {
-      await this.client.connect();
-
-      this.jsonStorageDb = this.client.db('json-storage');
-    };
-
-    connect();
+  private constructor(client: MongoClient) {
+    this.db = client.db('json-storage');
+    this.storageCollection = this.db.collection<Storage>('storages')!;
   }
 
-  get jsonStorage() {
-    return this.jsonStorageDb!;
+  static init = async (): Promise<Database> => {
+    const client = new MongoClient(uri);
+    try {
+      await client.connect();
+    } catch (error) {
+      console.error(error);
+    }
+    return new Database(client);
+  };
+
+  get storages() {
+    return this.storageCollection;
   }
 }
 
-const DB = new Database();
-
-export default DB;
+export default Database;

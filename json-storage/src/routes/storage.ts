@@ -1,58 +1,62 @@
-import fs from 'fs';
-import path from 'path';
-import { URL } from 'url';
-
-import express from 'express';
-
-import DB from '@/database';
+import { Collection } from 'mongodb';
+import express, { NextFunction, Request, Response, Router } from 'express';
 
 import APIError from '@/utils/error';
+import { formatPath } from '@/utils/formatPath';
 
 import { Storage } from '@/models/storage';
 
+import Database from '@/database';
+
 const storageRouter = express.Router();
 
-storageRouter.post('/*', async (req, res, next) => {
-  try {
-    const fullUrl = new URL(req.url, `http://${req.headers.host}`);
+class StorageController {
+  public router: Router;
+  public storages: Collection<Storage>;
 
-    const path = fullUrl.pathname;
-    const payload = req.body;
+  constructor(db: Database) {
+    this.storages = db.storages;
 
-    const storageCollection = DB.jsonStorage.collection('storages');
-
-    const storage = await storageCollection.findOne({ route: path });
-
-    if (storage) {
-      throw new APIError(409, 'Route already exists');
-    }
-
-    storageCollection.insertOne({ route: path, json: payload });
-
-    res.sendStatus(200);
-  } catch (error) {
-    next(error);
+    this.router = express.Router();
+    this.router.post("/*", this.createStorage);
+    this.router.get("/*", this.getStorage);
   }
-});
 
-storageRouter.get('/*', async (req, res, next) => {
-  try {
-    const fullUrl = new URL(req.url, `http://${req.headers.host}`);
-
-    const path = fullUrl.pathname;
-
-    const storageCollection = DB.jsonStorage.collection('storages');
-
-    const storage = await storageCollection.findOne<Storage>({ route: path });
-
-    if (!storage) {
-      throw new APIError(404, 'Route doesn\'t exist');
+  createStorage = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const path = formatPath(req.path);
+      const payload = req.body;
+  
+      const storage = await this.storages.findOne({ route: path });
+  
+      if (storage) {
+        throw new APIError(409, 'Route already exists');
+      }
+  
+      this.storages.insertOne({ route: path, json: payload });
+  
+      res.sendStatus(200);
+    } catch (error) {
+      next(error);
     }
-
-    res.status(200).json(storage.json);
-  } catch (error) {
-    next(error);
   }
-});
 
-export default storageRouter;
+  getStorage = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const path = formatPath(req.path);
+  
+      const storage = await this.storages.findOne<Storage>({ route: path });
+  
+      if (!storage) {
+        throw new APIError(404, 'Route doesn\'t exist');
+      }
+  
+      res.status(200).json(storage.json);
+      // res.status(200).json({ ok: true });
+    } catch (error) {
+      next(error);
+    }
+  }
+}
+
+export default StorageController;

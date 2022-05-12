@@ -13,14 +13,6 @@ const errorMiddleware: ErrorRequestHandler = (error, request, response, next) =>
     return;
   }
 
-  if(error.name == 'SyntaxError') {
-    response.status(400);
-    response.send({
-      status: 400,
-      message: "Bad Request!"
-    });
-  }
-
   if (error instanceof Error) {
     response.status(500).send({
       error: {
