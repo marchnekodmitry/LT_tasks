@@ -1,30 +1,28 @@
 const vacations = require('./vacations.json');
 
-const res = vacations
-    .map((vacation) => ({
-        userId: vacation.user._id,
+const map = new Map();
+
+vacations.forEach((vacation) => {
+    const vac = {
+        startDate: vacation.startDate,
+        endDate: vacation.endDate,
+    };
+    const key = vacation.user._id;
+
+    map.set(key, {
         name: vacation.user.name,
-        weekendDates: [{
-            startDate: vacation.startDate,
-            endDate: vacation.endDate,
-        }],
-    }))
-    .reduce((resultVacations, vacation) => {
-        const idx = resultVacations.findIndex((value) => value.userId === vacation.userId);
+        daysOff: map.has(key)
+            ? [...map.get(key).daysOff, vac]
+            : [vac],
+    });
+});
 
-        if (idx === -1) return [...resultVacations, vacation];
+const result = [];
+for (let [key, value] of map) {
+    result.push({
+        ...value,
+        userId: key,
+    });
+}
 
-        return [
-            ...resultVacations.slice(0, idx),
-            {
-                ...vacation,
-                weekendDates: [
-                    ...resultVacations[idx].weekendDates,
-                    ...vacation.weekendDates,
-                ],
-            },
-            ...resultVacations.slice(idx + 1),
-        ]
-    }, []);
-
-console.log(res);
+console.log(result);
