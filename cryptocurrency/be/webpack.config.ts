@@ -8,7 +8,7 @@ import dotenv from 'dotenv';
 const env = dotenv.config().parsed;
 
 const config: Configuration = {
-  mode: process.env.NODE_ENV as 'development' | 'production',
+  mode: process.env.NODE_ENV as 'development' | 'production' || 'development',
   target: 'node',
   context: path.join(__dirname, 'src'),
   entry: './index.ts',

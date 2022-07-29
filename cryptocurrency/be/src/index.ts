@@ -1,7 +1,7 @@
 import express from 'express';
 import bodyParser from 'body-parser';
 
-import CryptocurrencyController from '@/routes/cryptocurrency';
+import CryptocurrencyController from '@/controllers/cryptocurrency';
 
 import errorMiddleware from './middlewares/error';
 import syntaxErrorMiddleware from './middlewares/syntaxError';
